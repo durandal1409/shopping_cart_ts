@@ -1,6 +1,6 @@
-import { createContext, ReactNode, useState, useReducer, useContext } from "react";
+import { createContext, ReactNode, useState, useReducer, useContext, useEffect } from "react";
 import ShoppingCart from "../components/ShoppingCart";
-import useLocalStorage from "../hooks/useLocalStorage"
+// import useLocalStorage from "../hooks/useLocalStorage"
 
 type ShoppingCartProviderProps = {
     children: ReactNode
@@ -64,7 +64,12 @@ const reducer = (state:InitialStateType, action: Action) => {
 }
 
 export const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
+    const storageKey = "shopping-cart";
+    const [state, dispatch] = useReducer(reducer, initialState, (initialState) => JSON.parse(localStorage.getItem(storageKey)) || initialState);
+    useEffect(() => {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+    }, [state]);
+
     const [isOpen, setIsOpen] = useState(false);
 
     const openCart = () => setIsOpen(true);
