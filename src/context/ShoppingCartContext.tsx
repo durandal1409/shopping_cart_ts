@@ -19,8 +19,10 @@ type Action = {
 }
 
 const ShoppingCartContext = createContext<{
-    state: InitialStateType;
-    actions: object;
+    state: InitialStateType
+    actions: object
+    openCart: () => void
+    closeCart: () => void
 }>({});
 
 export const useShoppingCart = () => {
@@ -68,9 +70,6 @@ export const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) =>
     const openCart = () => setIsOpen(true);
     const closeCart = () => setIsOpen(false);
 
-    // const getItemQuantity = (id: number) => {
-    //     dispatch({type: "getItemQuantity", id})
-    // }
     const increaseCartQuantity = (id: number) => {
         dispatch({type: "increaseCartQuantity", id})
     }
@@ -85,7 +84,6 @@ export const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) =>
         <ShoppingCartContext.Provider value={{
             state,
             actions: {
-                // getItemQuantity, 
                 increaseCartQuantity, 
                 decreaseCartQuantity, 
                 removeFromCart,
