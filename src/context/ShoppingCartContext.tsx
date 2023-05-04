@@ -1,17 +1,21 @@
 import { createContext, ReactNode, useState, useReducer, useContext, useEffect } from "react";
-import ShoppingCart from "../components/ShoppingCart";
-// import useLocalStorage from "../hooks/useLocalStorage"
+
+import { cartContentReducer, cartOpenReducer} from "../reducers/reducers"
 
 type ShoppingCartProviderProps = {
     children: ReactNode
 }
 
-type InitialStateType = CartItem[];
+type InitialStateType = {
+    cartContent: CartItem[],
+    isOpen: boolean
+};
+
 type CartItem = {
     id: number,
     quantity: number
 }
-const initialState:InitialStateType = [];
+const initialState:InitialStateType = {cartContent: [], isOpen: false};
 
 type Action = {
     type: string,
@@ -21,68 +25,38 @@ type Action = {
 const ShoppingCartContext = createContext<{
     state: InitialStateType
     actions: object
-    openCart: () => void
-    closeCart: () => void
 }>({});
+
+const mainReducer = ({ cartContent, isOpen}, action) => ({
+    cartContent: cartContentReducer(cartContent, action),
+    isOpen: cartOpenReducer(isOpen, action)
+})
 
 export const useShoppingCart = () => {
     return useContext(ShoppingCartContext);
 }
 
-const reducer = (state:InitialStateType, action: Action) => {
-    switch(action.type) {
-        case "increaseCartQuantity": {
-            if (state.find(item => item.id === action.id) == null) {
-                return [...state, {id: action.id, quantity: 1}]
-            } else {
-                return state.map(item => {
-                    if (item.id === action.id) {
-                        return {...item, quantity: item.quantity + 1}
-                    } else {
-                        return item
-                    }
-                })
-            }
-        } case "decreaseCartQuantity": {
-            if (state.find(item => item.id === action.id)?.quantity === 1) {
-                return state.filter(item => item.id !== action.id)
-            } else {
-                return state.map(item => {
-                    if (item.id === action.id) {
-                        return {...item, quantity: item.quantity - 1}
-                    } else {
-                        return item
-                    }
-                })
-            }
-        } case "removeFromCart": {
-            return state.filter(item => item.id !== action.id)
-        } default: {
-            throw new Error("unrecognized action: " + action.type);
-        }
-    }
-}
-
 export const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) => {
     const storageKey = "shopping-cart";
-    const [state, dispatch] = useReducer(reducer, initialState, (initialState) => JSON.parse(localStorage.getItem(storageKey)) || initialState);
+    const [state, dispatch] = useReducer(mainReducer, initialState, (initialState) => JSON.parse(localStorage.getItem(storageKey)) || initialState);
     useEffect(() => {
         localStorage.setItem(storageKey, JSON.stringify(state));
     }, [state]);
 
-    const [isOpen, setIsOpen] = useState(false);
-
-    const openCart = () => setIsOpen(true);
-    const closeCart = () => setIsOpen(false);
-
     const increaseCartQuantity = (id: number) => {
-        dispatch({type: "increaseCartQuantity", id})
+        dispatch({type: "increase-cart-quantity", id})
     }
     const decreaseCartQuantity = (id: number) => {
-        dispatch({type: "decreaseCartQuantity", id})
+        dispatch({type: "decrease-cart-quantity", id})
     }
     const removeFromCart = (id: number) => {
-        dispatch({type: "removeFromCart", id})
+        dispatch({type: "remove-from-cart", id})
+    }
+    const openCart = () => {
+        dispatch({type: "open-cart"})
+    }
+    const closeCart = () => {
+        dispatch({type: "close-cart"})
     }
 
     return (
@@ -92,12 +66,11 @@ export const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) =>
                 increaseCartQuantity, 
                 decreaseCartQuantity, 
                 removeFromCart,
-            },
-            openCart,
-            closeCart
+                openCart,
+                closeCart
+            }
         }}>
             { children }
-            <ShoppingCart isOpen={isOpen}/>
         </ShoppingCartContext.Provider>
     )
 }

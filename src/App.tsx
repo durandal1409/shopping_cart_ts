@@ -3,7 +3,8 @@ import { Container } from "react-bootstrap";
 import Home from "./pages/Home";
 import Store from "./pages/Store";
 import About from "./pages/About";
-import Navbar from "./components/Navbar"
+import Navbar from "./components/Navbar";
+import ShoppingCart from "./components/ShoppingCart";
 import { ShoppingCartProvider } from "./context/ShoppingCartContext"
 
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
           <Route path="/about" element={<About />} />
         </Routes>
       </Container>
+      <ShoppingCart />
     </ShoppingCartProvider>
   )
 }
