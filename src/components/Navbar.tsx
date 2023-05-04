@@ -3,7 +3,8 @@ import { NavLink } from "react-router-dom";
 import { useShoppingCart } from "../context/ShoppingCartContext";
 
 const Navbar = () => {
-    const { openCart, cartQuantity } = useShoppingCart();
+    const { openCart, state } = useShoppingCart();
+    const cartQuantity = state.reduce((quantity, item) => item.quantity + quantity, 0);
     return (
         <NavbarBs sticky="top" className="bg-white shadow-sm mb-3">
             <Container>

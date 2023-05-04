@@ -1,93 +1,97 @@
-import { createContext, useContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useState, useReducer, useContext } from "react";
 import ShoppingCart from "../components/ShoppingCart";
 import useLocalStorage from "../hooks/useLocalStorage"
 
 type ShoppingCartProviderProps = {
     children: ReactNode
 }
-type ShoppingCartContext = {
-    getItemQuantity: (id: number) => number,
-    increaseCartQuantity: (id: number) => void,
-    decreaseCartQuantity: (id: number) => void,
-    removeFromCart: (id: number) => void,
-    openCart: () => void,
-    closeCart: () => void,
-    cartQuantity: number,
-    cartItems: CartItem[]
-}
+
+type InitialStateType = CartItem[];
 type CartItem = {
     id: number,
     quantity: number
 }
+const initialState:InitialStateType = [];
 
-const ShoppingCartContext = createContext({} as ShoppingCartContext)
-
-export const useShoppingCart = () => {
-    return useContext(ShoppingCartContext)
+type Action = {
+    type: string,
+    id: number
 }
 
-export const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [cartItems, setCartItems] = useLocalStorage<CartItem[]>("shopping-cart", [])
+const ShoppingCartContext = createContext<{
+    state: InitialStateType;
+    actions: object;
+}>({});
 
-    const cartQuantity = cartItems.reduce((quantity, item) => item.quantity + quantity, 0);
+export const useShoppingCart = () => {
+    return useContext(ShoppingCartContext);
+}
 
-    const openCart = () => setIsOpen(true);
-    const closeCart = () => setIsOpen(false);
-
-    const getItemQuantity = (id: number) => {
-        return cartItems.find(item => item.id === id)?.quantity || 0
-    }
-
-    const increaseCartQuantity = (id: number) => {
-        setCartItems(currItems => {
-            if (currItems.find(item => item.id === id) == null) {
-                return [...currItems, {id, quantity: 1}]
+const reducer = (state:InitialStateType, action: Action) => {
+    switch(action.type) {
+        case "increaseCartQuantity": {
+            if (state.find(item => item.id === action.id) == null) {
+                return [...state, {id: action.id, quantity: 1}]
             } else {
-                return currItems.map(item => {
-                    if (item.id === id) {
+                return state.map(item => {
+                    if (item.id === action.id) {
                         return {...item, quantity: item.quantity + 1}
                     } else {
                         return item
                     }
                 })
             }
-
-        })
-    }
-    const decreaseCartQuantity = (id: number) => {
-        setCartItems(currItems => {
-            if (currItems.find(item => item.id === id)?.quantity === 1) {
-                return currItems.filter(item => item.id !== id)
+        } case "decreaseCartQuantity": {
+            if (state.find(item => item.id === action.id)?.quantity === 1) {
+                return state.filter(item => item.id !== action.id)
             } else {
-                return currItems.map(item => {
-                    if (item.id === id) {
+                return state.map(item => {
+                    if (item.id === action.id) {
                         return {...item, quantity: item.quantity - 1}
                     } else {
                         return item
                     }
                 })
             }
+        } case "removeFromCart": {
+            return state.filter(item => item.id !== action.id)
+        } default: {
+            throw new Error("unrecognized action: " + action.type);
+        }
+    }
+}
 
-        })
+export const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) => {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const openCart = () => setIsOpen(true);
+    const closeCart = () => setIsOpen(false);
+
+    // const getItemQuantity = (id: number) => {
+    //     dispatch({type: "getItemQuantity", id})
+    // }
+    const increaseCartQuantity = (id: number) => {
+        dispatch({type: "increaseCartQuantity", id})
+    }
+    const decreaseCartQuantity = (id: number) => {
+        dispatch({type: "decreaseCartQuantity", id})
     }
     const removeFromCart = (id: number) => {
-        setCartItems(currItems => {
-            return currItems.filter(item => item.id !== id)
-        })
+        dispatch({type: "removeFromCart", id})
     }
-
 
     return (
         <ShoppingCartContext.Provider value={{
-            getItemQuantity, 
-            increaseCartQuantity, 
-            decreaseCartQuantity, 
-            removeFromCart,
+            state,
+            actions: {
+                // getItemQuantity, 
+                increaseCartQuantity, 
+                decreaseCartQuantity, 
+                removeFromCart,
+            },
             openCart,
-            closeCart,
-            cartItems,
-            cartQuantity
+            closeCart
         }}>
             { children }
             <ShoppingCart isOpen={isOpen}/>

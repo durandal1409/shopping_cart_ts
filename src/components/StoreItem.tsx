@@ -10,13 +10,14 @@ type StoreItemProps = {
 }
 
 const StoreItem = ({id, name, price, imgUrl}: StoreItemProps) => {
-    const {
-        getItemQuantity, 
-        increaseCartQuantity, 
-        decreaseCartQuantity, 
-        removeFromCart
+    const { state, actions: {
+            // getItemQuantity, 
+            increaseCartQuantity, 
+            decreaseCartQuantity, 
+            removeFromCart
+        }
     } = useShoppingCart();
-    const quantity = getItemQuantity(id);
+    const quantity = state.find(item => item.id === id)?.quantity || 0;
     return (
         <Card className="h-100">
             <Card.Img src={imgUrl} variant="top" height="200px" style={{objectFit: "cover"}} />
