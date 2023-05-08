@@ -1,7 +1,8 @@
 import { Button, Stack } from "react-bootstrap";
-import { useShoppingCart } from "../context/ShoppingCartContext";
+import { useDispatch } from "react-redux";
 import storeItems from "../data/items.json";
 import { formatCurrency } from "../utilities/formatCurrency";
+import { removeFromCart } from "../store";
 
 type CartItemProps = {
     id: number,
@@ -9,7 +10,7 @@ type CartItemProps = {
 }
 
 const CartItem = ({id, quantity}: CartItemProps) => {
-    const { actions: {removeFromCart} } = useShoppingCart()
+    const dispatch = useDispatch();
     const item = storeItems.find(i => i.id === id)
     if (item == null) return null
 
@@ -36,7 +37,7 @@ const CartItem = ({id, quantity}: CartItemProps) => {
         <Button
             variant="outline-danger"
             size="sm"
-            onClick={() => removeFromCart(item.id)}
+            onClick={() => dispatch(removeFromCart(item.id))}
         >
             &times;
         </Button>

@@ -5,12 +5,13 @@ import Store from "./pages/Store";
 import About from "./pages/About";
 import Navbar from "./components/Navbar";
 import ShoppingCart from "./components/ShoppingCart";
-import { ShoppingCartProvider } from "./context/ShoppingCartContext"
+import { Provider } from "react-redux";
+import { store } from "./store";
 
 const App = () => {
 
   return (
-    <ShoppingCartProvider>
+    <Provider store={store}>
       <Navbar />
       <Container className="mb-4">
         <Routes>
@@ -20,7 +21,7 @@ const App = () => {
         </Routes>
       </Container>
       <ShoppingCart />
-    </ShoppingCartProvider>
+    </Provider>
   )
 }
 
