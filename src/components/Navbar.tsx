@@ -2,11 +2,13 @@ import { Container, Nav, Button, Navbar as NavbarBs } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { cartOpen } from "../store";
+import { RootState } from "../store";
+import type { CartItemType } from "../store/slices/cartContentSlice";
 
 const Navbar = () => {
     const dispatch = useDispatch();
-    const cartContent = useSelector(state => state.cartContent);
-    const cartQuantity = cartContent.reduce((quantity, item) => item.quantity + quantity, 0);
+    const cartContent = useSelector((state: RootState) => state.cartContent);
+    const cartQuantity = cartContent.reduce((quantity: number, item: CartItemType) => item.quantity + quantity, 0);
     return (
         <NavbarBs sticky="top" className="bg-white shadow-sm mb-3">
             <Container>

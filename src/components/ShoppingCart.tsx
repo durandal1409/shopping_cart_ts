@@ -4,12 +4,14 @@ import { cartClose } from "../store";
 import CartItem from "./CartItem";
 import { formatCurrency } from "../utilities/formatCurrency";
 import storeItems from "../data/items.json";
+import { RootState } from "../store";
+import type { CartItemType } from "../store/slices/cartContentSlice";
 
 const ShoppingCart = () => {
 
     const dispatch = useDispatch();
-    const isOpen = useSelector(state => state.cartOpen);
-    const cartContent = useSelector(state => state.cartContent);
+    const isOpen = useSelector((state: RootState) => state.cartOpen);
+    const cartContent = useSelector((state: RootState) => state.cartContent);
 
     return (
         <Offcanvas show={isOpen} onHide={() => dispatch(cartClose())} placement="end">
@@ -18,13 +20,13 @@ const ShoppingCart = () => {
             </Offcanvas.Header>
             <Offcanvas.Body>
                 <Stack gap={3}>
-                {cartContent.map(item => (
+                {cartContent.map((item: CartItemType) => (
                     <CartItem key={item.id} {...item} />
                 ))}
                 <div className="ms-auto fw-bold fs-5">
                     Total{" "}
                     {formatCurrency(
-                    cartContent.reduce((total, cartItem) => {
+                    cartContent.reduce((total: number, cartItem: CartItemType) => {
                         const item = storeItems.find(i => i.id === cartItem.id)
                         return total + (item?.price || 0) * cartItem.quantity
                     }, 0)

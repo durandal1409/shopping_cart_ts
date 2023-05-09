@@ -2,6 +2,8 @@ import { Card, Button } from "react-bootstrap";
 import { formatCurrency } from "../utilities/formatCurrency";
 import { useDispatch, useSelector } from "react-redux";
 import { increaseCartQuantity, decreaseCartQuantity, removeFromCart } from "../store";
+import { RootState } from "../store";
+import type { CartItemType } from "../store/slices/cartContentSlice";
 
 type StoreItemProps = {
     id: number,
@@ -12,9 +14,9 @@ type StoreItemProps = {
 
 const StoreItem = ({id, name, price, imgUrl}: StoreItemProps) => {
     const dispatch = useDispatch();
-    const cartContent = useSelector(state => state.cartContent);
+    const cartContent = useSelector((state: RootState) => state.cartContent);
     
-    const quantity = cartContent.find(item => item.id === id)?.quantity || 0;
+    const quantity = cartContent.find((item: CartItemType) => item.id === id)?.quantity || 0;
     return (
         <Card className="h-100">
             <Card.Img src={imgUrl} variant="top" height="200px" style={{objectFit: "cover"}} />

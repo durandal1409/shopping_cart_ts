@@ -46,3 +46,4 @@ const cartContentSlice = createSlice({
 
 export const { increaseCartQuantity, decreaseCartQuantity, removeFromCart } = cartContentSlice.actions;
 export const cartContentReducer = cartContentSlice.reducer;
+export type { CartItem as CartItemType };
